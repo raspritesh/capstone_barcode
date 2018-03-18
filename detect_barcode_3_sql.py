@@ -2,10 +2,10 @@
 #linked to mysql
 #tested-working good -11/03/2018
 #before running create database using insert commmands
-#insert into e(id,name,bookid,bookname,issuedate,returndate,status)values("14BEC0***","652837659","9781904994862",
-#                                                                         "dip","22/07/2017","15/08/2017","1");
-#insert into e(id,name,bookid,bookname,issuedate,returndate,status)values("14BEC0***","qwertyu","005150024163",
-#                                                                         "dip","22/12/2017","15/01/2018","1");
+#insert into e(id,name,bookid,bookname,issuedate,returndate,status,delay)values("14BEC0***","652837659","9781904994862",
+#                                                                         "dip","22/07/2017","15/08/2017","1","10");
+#insert into e(id,name,bookid,bookname,issuedate,returndate,status),delayvalues("14BEC0***","qwertyu","005150024163",
+#                                                                         "dip","22/12/2017","15/01/2018","1","5");
 
 #set date properly by following command
 #sudo date -s"Mon aug 12 20:14:11 UTC 2014"
@@ -118,7 +118,7 @@ cv2.drawContours(image, [box], -1, (255, 255, 0), 3)
 
 #cv2.imshow("Image", image)
 #print a[0]
-sql="select id,name,bookname,issuedate,returndate from e where bookid='%s' and status='1';" %a[0]
+sql="select id,name,bookname,issuedate,returndate,delay from e where bookid='%s' and status='1';" %a[0]
 cur.execute(sql)
 result=cur.fetchall()
 if result==():
@@ -130,9 +130,11 @@ else:
                 bookname=row[2]
                 issuedate=row[3]
                 returndate=row[4]
+                delay=row[5]
         print "Registration Number='%s'"%Id,
         print "Name='%s'"%name,
         print "Book Name='%s'"%bookname
+        print "Delay='%s'"%delay
         q=1
 	l=[]
         l=returndate.split('/')
@@ -147,6 +149,8 @@ else:
                 g=0
         print "Fine=Rs.%s"%g
         sql="update e set status='0' where bookid='%s';"%a[0]
+       
+        
 try:
                 	
     cur.execute(sql)
@@ -158,6 +162,8 @@ except Exception as e:
 elapsed=timeit.default_timer()-start_time
 print elapsed
 
+
+    
 
 
         

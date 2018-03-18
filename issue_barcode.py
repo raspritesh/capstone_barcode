@@ -2,10 +2,10 @@
 #linked to mysql
 #tested-working good -11/03/2018
 #before running create database using insert commmands
-#insert into e(id,name,bookid,bookname,issuedate,returndate,status)values("14BEC0***","652837659","9781904994862",
-#                                                                         "dip","22/07/2017","15/08/2017","1");
-#insert into e(id,name,bookid,bookname,issuedate,returndate,status)values("14BEC0***","qwertyu","005150024163",
-#                                                                         "dip","22/12/2017","15/01/2018","1");
+#insert into e(id,name,bookid,bookname,issuedate,returndate,status,delay)values("14BEC0***","652837659","9781904994862",
+#                                                                         "dip","22/07/2017","15/08/2017","1","10");
+#insert into e(id,name,bookid,bookname,issuedate,returndate,status),delayvalues("14BEC0***","qwertyu","005150024163",
+#                                                                         "dip","22/12/2017","15/01/2018","1","5");
 
 #set date properly by following command
 #sudo date -s"Mon aug 12 20:14:11 UTC 2014"
@@ -24,6 +24,7 @@ from PIL import Image
 import MySQLdb as m
 import serial
 import types
+import rfidreader1
 def fine(d1,m1,y1,d2,m2,y2):
     a=0
     d=date(y1,m1,d1)
@@ -36,9 +37,9 @@ def fine(d1,m1,y1,d2,m2,y2):
 start_time= timeit.default_timer()
 db=m.connect("localhost","root","ritesh","cap")
 import RPi.GPIO as gpio
-sql="""CREATE TABLE IF NOT EXISTS e(id varchar(50) not null)"""
+#sql="""CREATE TABLE IF NOT EXISTS e(id varchar(50) not null)"""
 cur=db.cursor()
-cur.execute(sql)
+#cur.execute(sql)
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required = True, help = "path")
@@ -117,47 +118,40 @@ box = np.int0(cv2.cv.BoxPoints(rect))
 cv2.drawContours(image, [box], -1, (255, 255, 0), 3)
 
 #cv2.imshow("Image", image)
-#print a[0]
-sql="select id,name,bookname,issuedate,returndate from e where bookid='%s' and status='1';" %a[0]
+#print a[0]\
+res=rfidreader1.reading()
+sql="select id,name from info where rfid='%s';" %res
+print res
 cur.execute(sql)
 result=cur.fetchall()
 if result==():
         print "None"
 else:
         for row in result:
-                Id=row[0]
+                regid=row[0]
                 name=row[1]
-                bookname=row[2]
-                issuedate=row[3]
-                returndate=row[4]
-        print "Registration Number='%s'"%Id,
-        print "Name='%s'"%name,
-        print "Book Name='%s'"%bookname
-        q=1
-	l=[]
-        l=returndate.split('/')
-        now=time.strftime("%d/%m/%Y")
-	k=[]
-        k=now.split("/")
-        j=map(int,k)
-        p=map(int,l)
-        g=fine(p[0],p[1],p[2],j[0],j[1],j[2])
-     
-        if g<0:
-                g=0
-        print "Fine=Rs.%s"%g
-        sql="update e set status='0' where bookid='%s';"%a[0]
+sql="select bookname,delay from bookinfo where barid='%s';"%a[0]
+cur.execute(sql)
+result1=cur.fetchall()
+for row1 in result1:
+    bookname=row1[0]
+    delay=row1[1]
+inp4=raw_input("Enter issuedate").strip('\n')  # for eg. 22/07/2017
+inp5=raw_input("Enter return date").strip('\n')
+l=1
+sql="insert into issueb (id,name,bookid,bookname,issuedate,returndate,status,delay)values('%s','%s','%s','%s','%s','%s','%s','%s');"%(regid,name,a[0],bookname,inp4,inp5,l,delay)
+
 try:
-                	
     cur.execute(sql)
     db.commit()
-			
 except Exception as e:
     print "Some error occured:",e
     db.rollback()
-elapsed=timeit.default_timer()-start_time
-print elapsed
+        
+   
 
+
+    
 
 
         
